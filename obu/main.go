@@ -2,19 +2,28 @@ package main
 
 import (
 	"fmt"
+	"log"
+	"math"
 	"math/rand"
 	"time"
+
+	"github.com/gorilla/websocket"
+	"github.com/lewiscasewell/tolling/types"
 )
 
 const (
 	sendInterval = 2
+	wsEndpoint   = "ws://localhost:8080/ws"
 )
 
-type OBUData struct {
-	OBUID     int     `json:"obuID"`
-	Latitude  float64 `json:"latitude"`
-	Longitude float64 `json:"longitude"`
-}
+// func sendOBUData(conn *websocket.Conn,data OBUData) {
+// 	err := conn.WriteJSON(data)
+// 	if err != nil {
+// 		log.Println("write:", err)
+// 		return
+// 	}
+
+// }
 
 func genLocation() (float64, float64) {
 	return genCoordinates(), genCoordinates()
@@ -29,14 +38,32 @@ func genCoordinates() float64 {
 func genOBUIDs(n int) []int {
 	ids := make([]int, n)
 	for i := 0; i < n; i++ {
-		ids[i] = i + 1
+		ids[i] = rand.Intn(math.MaxInt)
 	}
 	return ids
 }
 
 func main() {
+	obuIds := genOBUIDs(10)
+	conn, _, err := websocket.DefaultDialer.Dial(wsEndpoint, nil)
+	if err != nil {
+		log.Fatal("dial:", err)
+	}
 	for {
-		fmt.Println(genLocation())
+		for _, id := range obuIds {
+			lat, lng := genLocation()
+			data := types.OBUData{
+				OBUID:     id,
+				Latitude:  lat,
+				Longitude: lng,
+			}
+			fmt.Println(data)
+			err := conn.WriteJSON(data)
+			if err != nil {
+				log.Fatal("write:", err)
+				return
+			}
+		}
 		time.Sleep(sendInterval * time.Second)
 	}
 }
