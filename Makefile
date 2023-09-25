@@ -7,7 +7,18 @@ obu:
 	@./bin/obu
 
 receiver:
-	@go build -o bin/data_receiver data_receiver/main.go
+	@go build -o bin/data_receiver ./data_receiver
 	@./bin/data_receiver
 
-.PHONY: obu receiver
+calculator:
+	@go build -o bin/distance_calculator ./distance_calculator
+	@./bin/distance_calculator
+
+aggregator:
+	@go build -o bin/aggregator ./aggregator
+	@./bin/aggregator
+
+proto:
+	protoc --go_out=. --go_opt=paths=source_relative types/ptypes.proto
+
+.PHONY: obu receiver calculator aggregator

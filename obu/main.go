@@ -12,7 +12,7 @@ import (
 )
 
 const (
-	sendInterval = 2
+	sendInterval = time.Second * 5
 	wsEndpoint   = "ws://localhost:8080/ws"
 )
 
@@ -64,7 +64,7 @@ func main() {
 				return
 			}
 		}
-		time.Sleep(sendInterval * time.Second)
+		time.Sleep(sendInterval)
 	}
 }
 
